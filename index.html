@@ -132,6 +132,11 @@
             beWoundedTableBody.appendChild(beWoundedRow);
         }
 
+        window.onload = function() {
+            updateChanceTable();
+            updateBeWoundedTable();
+        };
+
         // Initialize the tables on input change
         document.getElementById('quality').addEventListener('input', updateChanceTable);
         document.getElementById('ap').addEventListener('input', updateChanceTable);
