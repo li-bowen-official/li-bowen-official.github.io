@@ -1,0 +1,35 @@
+<html>
+    <head>
+        <script src="simple_blackjack.js"></script>
+        <link rel="stylesheet" type="text/css" href="simple_blackjack.css">
+    </head>
+    <body>
+        <div id="container">
+            <div id="left-div">
+                <table id="cards">
+                    <tr>
+                        <th>Card 1</th>
+                        <td id="first-card">0</td>
+                    </tr>
+                    <tr>
+                        <th>Card 2</th>
+                        <td id="second-card">0</td>
+                    </tr>
+                </table>
+            </div>
+            <div id="right-div">
+                <table id="result">
+                    <tr>
+                        <th>Sum</th>
+                        <td id="sum">0</td>
+                    </tr>
+                </table>
+                <div id="button-container">
+                    <button id="deal" onclick="deal()">Deal!</button>
+                    <button id="hit-me" onclick="hitMe()">Hit Me!</button>
+                    <button id="stand" onclick="stand()">Stand!</button>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>Official Li Bowen's Website</title>
+        <link rel="stylesheet" href="style.css">
+        <style>
+      table {
+          width: 100%;
+          border-collapse: collapse;
+      }
+      th, td {
+          border: 1px solid black;
+          padding: 8px;
+          text-align: center;
+      }
+  </style>
+    </head>
+    <a href="..">Go Back</a>
+    <body>
+        <h1>Chance to Wound Enemy</h1>
+        <label for="quality">Quality (between 2 and 6):</label>
+        <input type="number" id="quality" name="quality" min="2" max="6"
+            value="4"
+            oninput="updateChanceTable()"><br><br>
+        <label for="ap">My AP (between 0 and 4):</label>
+        <input type="number" id="ap" name="ap" min="0" max="4" value="0"
+            oninput="updateChanceTable()"><br><br>
+        <label for="enemyShield">Enemy has shield?</label>
+        <input type="checkbox" id="enemyShield" name="enemyShield"
+            onclick="updateChanceTable()"><br><br>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Enemy Defense</th>
+                    <th>2</th>
+                    <th>3</th>
+                    <th>4</th>
+                    <th>5</th>
+                    <th>6</th>
+                </tr>
+            </thead>
+            <tbody id="chanceTable">
+                <!-- Rows will be dynamically generated here -->
+            </tbody>
+        </table>
+
+        <h1>Chance to Be Wounded</h1>
+        <label for="defense">Defense (between 2 and 6):</label>
+        <input type="number" id="defense" name="defense" min="2" max="6"
+            value="4"
+            oninput="updateBeWoundedTable()"><br><br>
+        <label for="enemyAp">Enemy AP (between 0 and 4):</label>
+        <input type="number" id="enemyAp" name="enemyAp" min="0" max="4"
+            value="0"
+            oninput="updateBeWoundedTable()"><br><br>
+        <label for="myShield">I have shield?</label>
+        <input type="checkbox" id="myShield" name="myShield"
+            onclick="updateBeWoundedTable()"><br><br>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Enemy Quality</th>
+                    <th>2</th>
+                    <th>3</th>
+                    <th>4</th>
+                    <th>5</th>
+                    <th>6</th>
+                </tr>
+            </thead>
+            <tbody id="beWoundedTable">
+                <!-- Rows will be dynamically generated here -->
+            </tbody>
+        </table>
+
+        <script>
+        function calculateChanceToWound(quality, defense, ap, enemyShield) {
+            const chanceToHit = (7 - quality) / 6;
+            let effectiveDefense = defense;
+            if (enemyShield) {
+                ap = Math.max(0, ap - 1);
+            }
+            effectiveDefense = Math.max(2, defense - ap);
+            const chanceToBlock = (7 - effectiveDefense) / 6;
+            return (chanceToHit * (1 - chanceToBlock)) * 100;
+        }
+
+        function calculateChanceToBeWounded(enemyQuality, defense, enemyAp, myShield) {
+            const chanceToHit = (7 - enemyQuality) / 6;
+            let effectiveDefense = defense;
+            if (myShield) {
+                enemyAp = Math.max(0, enemyAp - 1);
+            }
+            effectiveDefense = Math.max(2, defense - enemyAp);
+            const chanceToBlock = (7 - effectiveDefense) / 6;
+            return (chanceToHit * (1 - chanceToBlock)) * 100;
+        }
+
+        function updateChanceTable() {
+            const quality = parseInt(document.getElementById('quality').value);
+            const ap = parseInt(document.getElementById('ap').value);
+            const enemyShield = document.getElementById('enemyShield').checked;
+            const chanceTableBody = document.getElementById('chanceTable');
+            chanceTableBody.innerHTML = '';
+
+            const chanceRow = document.createElement('tr');
+            chanceRow.innerHTML = '<td>Chance to Wound (%)</td>';
+            for (let enemyDefense = 2; enemyDefense <= 6; enemyDefense++) {
+                const cell = document.createElement('td');
+                const chanceToWound = calculateChanceToWound(quality, enemyDefense, ap, enemyShield).toFixed(2);
+                cell.textContent = chanceToWound;
+                chanceRow.appendChild(cell);
+            }
+            chanceTableBody.appendChild(chanceRow);
+        }
+
+        function updateBeWoundedTable() {
+            const defense = parseInt(document.getElementById('defense').value);
+            const enemyAp = parseInt(document.getElementById('enemyAp').value);
+            const myShield = document.getElementById('myShield').checked;
+            const beWoundedTableBody = document.getElementById('beWoundedTable');
+            beWoundedTableBody.innerHTML = '';
+
+            const beWoundedRow = document.createElement('tr');
+            beWoundedRow.innerHTML = '<td>Chance to Be Wounded (%)</td>';
+            for (let enemyQuality = 2; enemyQuality <= 6; enemyQuality++) {
+                const cell = document.createElement('td');
+                const chanceToBeWounded = calculateChanceToBeWounded(enemyQuality, defense, enemyAp, myShield).toFixed(2);
+                cell.textContent = chanceToBeWounded;
+                beWoundedRow.appendChild(cell);
+            }
+            beWoundedTableBody.appendChild(beWoundedRow);
+        }
+
+        window.onload = function() {
+            updateChanceTable();
+            updateBeWoundedTable();
+        };
+
+        // Initialize the tables on input change
+        document.getElementById('quality').addEventListener('input', updateChanceTable);
+        document.getElementById('ap').addEventListener('input', updateChanceTable);
+        document.getElementById('enemyShield').addEventListener('change', updateChanceTable);
+        document.getElementById('defense').addEventListener('input', updateBeWoundedTable);
+        document.getElementById('enemyAp').addEventListener('input', updateBeWoundedTable);
+        document.getElementById('myShield').addEventListener('change', updateBeWoundedTable);
+    </script>
+    </body>
+</html>
