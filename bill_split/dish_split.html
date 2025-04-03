@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Dish Split Calculator</title>
+        <style>
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 5px;
+            font-size: 14px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            overflow-x: auto;
+            display: block;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+            font-size: 14px;
+        }
+        th {
+            background-color: #f4f4f4;
+            font-size: 16px;
+        }
+        th:nth-child(1), td:nth-child(1) {
+            width: 15%; /* Narrower for Dish Name */
+        }
+        th:nth-child(2), td:nth-child(2) {
+            width: 10%; /* Narrower for People Sharing */
+        }
+        th:nth-child(3), td:nth-child(3) {
+            width: 10%; /* Narrower for Listed Price */
+        }
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+        }
+        .button-group button {
+            padding: 5px 10px;
+            font-size: 14px;
+        }
+        .remove-btn {
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        .remove-btn:hover {
+            background-color: #e60000;
+        }
+        .receipt {
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            padding: 10px;
+            background-color: #f9f9f9;
+        }
+        .receipt h2 {
+            text-align: center;
+        }
+        @media (max-width: 768px) {
+            table {
+                font-size: 12px;
+            }
+            th, td {
+                padding: 6px;
+            }
+            .remove-btn {
+                padding: 4px 8px;
+                font-size: 12px;
+            }
+            .button-group button {
+                padding: 4px 8px;
+                font-size: 12px;
+            }
+        }
+        @media (max-width: 480px) {
+            table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+            th:nth-child(1), td:nth-child(1) {
+                width: 20%; /* Adjust for smaller screens */
+            }
+            th:nth-child(2), td:nth-child(2) {
+                width: 15%; /* Adjust for smaller screens */
+            }
+            th:nth-child(3), td:nth-child(3) {
+                width: 15%; /* Adjust for smaller screens */
+            }
+            .receipt {
+                font-size: 14px;
+            }
+        }
+    </style>
+
+        <header>
+            <h1>Welcome to Dish Split</h1>
+            <nav>
+                <a href="bill_calculator.html">Bill Calculator</a> |
+                <a href="../index.html">Home</a>
+            </nav>
+        </header>
+        <body>
+            <h1>Dish Split Calculator</h1>
+            <button onclick="addRow()">Add Dish</button>
+            <table id="billTable">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>People Sharing</th>
+                        <th>Listed</th>
+                        <th>SC (10%)</th>
+                        <th>GST (9%)</th>
+                        <th>Final Price</th>
+                        <th>Price Shared</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+            <div class="receipt" id="receipt">
+                <h2>Receipt</h2>
+                <p>Total Listed Price: <span
+                        id="totalListedPrice">0.00</span></p>
+                <p>Total Service Charge: <span
+                        id="totalServiceCharge">0.00</span></p>
+                <p>Total GST: <span id="totalGST">0.00</span></p>
+                <p><strong>Total Final Price: <span
+                            id="totalFinalPrice">0.00</span></strong></p>
+            </div>
+
+            <script>
+            function updateReceipt() {
+                const rows = document.querySelectorAll('#billTable tbody tr');
+                let totalListedPrice = 0;
+                let totalServiceCharge = 0;
+                let totalGST = 0;
+                let totalFinalPrice = 0;
+
+                rows.forEach(row => {
+                    const listedPrice = parseFloat(row.cells[2].querySelector('input').value) || 0;
+                    const serviceCharge = row.cells[3].querySelector('input').checked ? 0.1 * listedPrice : 0;
+                    const gst = row.cells[4].querySelector('input').checked ? 0.09 * (listedPrice + serviceCharge) : 0;
+                    const finalPrice = listedPrice + serviceCharge + gst;
+
+                    totalListedPrice += listedPrice;
+                    totalServiceCharge += serviceCharge;
+                    totalGST += gst;
+                    totalFinalPrice += finalPrice;
+                });
+
+                document.getElementById('totalListedPrice').textContent = totalListedPrice.toFixed(2);
+                document.getElementById('totalServiceCharge').textContent = totalServiceCharge.toFixed(2);
+                document.getElementById('totalGST').textContent = totalGST.toFixed(2);
+                document.getElementById('totalFinalPrice').textContent = totalFinalPrice.toFixed(2);
+            }
+
+            // Update receipt whenever a row is updated
+            document.getElementById('billTable').addEventListener('input', updateReceipt);
+            document.getElementById('billTable').addEventListener('change', updateReceipt);
+       
+            function addRow() {
+                const table = document.getElementById('billTable').getElementsByTagName('tbody')[0];
+                const row = table.insertRow();
+
+                // Dish Name
+                const dishCell = row.insertCell(0);
+                dishCell.innerHTML = '<input type="text" placeholder="Name">';
+
+                // People Sharing
+                const peopleCell = row.insertCell(1);
+                peopleCell.innerHTML = '<input type="number" value="1" min="1" onchange="updateRow(this)">';
+
+                // Listed Price
+                const priceCell = row.insertCell(2);
+                priceCell.innerHTML = '<input type="number" value="0" min="0" step="0.01" onchange="updateRow(this)">';
+
+                // Service Charge
+                const serviceCell = row.insertCell(3);
+                serviceCell.innerHTML = '<input type="checkbox" onchange="updateRow(this)">';
+
+                // GST
+                const gstCell = row.insertCell(4);
+                gstCell.innerHTML = '<input type="checkbox" onchange="updateRow(this)">';
+
+                // Final Price
+                const finalPriceCell = row.insertCell(5);
+                finalPriceCell.innerHTML = '<span>0.00</span>';
+
+                // Price Shared
+                const sharedPriceCell = row.insertCell(6);
+                sharedPriceCell.innerHTML = '<span>0.00</span>';
+                // Remove Button
+                const removeCell = row.insertCell(7);
+                removeCell.innerHTML = '<button class="remove-btn">Remove</button>';
+                removeCell.querySelector('.remove-btn').addEventListener('click', () => {
+                    row.remove();
+                });
+            }
+
+            function updateRow(element) {
+                // Adjust GST calculation to apply on top of the service charge
+                const row = element.closest('tr');
+                const listedPrice = parseFloat(row.cells[2].querySelector('input').value) || 0;
+                const serviceCharge = row.cells[3].querySelector('input').checked ? 0.1 : 0;
+                const gst = row.cells[4].querySelector('input').checked ? 0.09 : 0;
+                const peopleSharing = parseInt(row.cells[1].querySelector('input').value) || 1;
+
+                const finalPrice = listedPrice * (1 + serviceCharge) * (1 + gst);
+                const priceShared = finalPrice / peopleSharing;
+
+                row.cells[5].querySelector('span').textContent = finalPrice.toFixed(2);
+                row.cells[6].querySelector('span').textContent = priceShared.toFixed(2);
+            }
+            </script>
+        </body>
+    </html>

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="Bill Split Application">
+        <title>Bill Calculator</title>
+        <link rel="stylesheet" href="bill_styles.css">
+    </head>
+    <body>
+        <header>
+            <h1>Welcome to Bill Calculator</h1>
+            <nav>
+                <a href="dish_split.html">Dish Split</a> |
+                <a href="../index.html">Home</a>
+            </nav>
+        </header>
+        <main>
+            <p>Start calculating your bills easily!</p>
+            <div>
+                <label for="total-bill">Total Bill Amount:</label>
+                <input type="number" id="total-bill"
+                    placeholder="Enter total bill" step="0.01">
+            </div>
+            <div>
+                <label for="service-charge">
+                    <input type="checkbox" id="service-charge"> Include Service
+                    Charge (10%)
+                </label>
+            </div>
+            <div>
+                <label for="gst">
+                    <input type="checkbox" id="gst"> Include GST (9%)
+                </label>
+            </div>
+            <div>
+                <p>Original Amount: <span id="calculated-total">0.00</span></p>
+            </div>
+            <div>
+                <table border="1">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody id="breakdown-table">
+                        <tr>
+                            <td>Base Amount</td>
+                            <td id="base-amount">0.00</td>
+                        </tr>
+                        <tr>
+                            <td>Service Charge (10%)</td>
+                            <td id="service-charge-amount">0.00</td>
+                        </tr>
+                        <tr>
+                            <td>GST (9%)</td>
+                            <td id="gst-amount">0.00</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div>
+                <h2>People Involved</h2>
+                <button id="add-person">Add Person</button>
+                <table border="1" id="people-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Product Price</th>
+                            <th>Final Price</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+            <script>
+                function updateTotal() {
+                    const totalBill = parseFloat(document.getElementById('total-bill').value) || 0;
+                    const includeServiceCharge = document.getElementById('service-charge').checked;
+                    const includeGst = document.getElementById('gst').checked;
+
+                    let baseAmount = totalBill;
+                    if (includeServiceCharge) {
+                        baseAmount /= 1.10; // Remove Service Charge
+                    }
+                    if (includeGst) {
+                        baseAmount /= 1.09; // Remove GST
+                    }
+
+                    const serviceChargeAmount = includeServiceCharge ? baseAmount * 0.10 : 0;
+                    const gstAmount = includeGst ? baseAmount * 0.09 : 0;
+
+                    document.getElementById('calculated-total').textContent = totalBill.toFixed(2);
+                    document.getElementById('base-amount').textContent = baseAmount.toFixed(2);
+                    document.getElementById('service-charge-amount').textContent = serviceChargeAmount.toFixed(2);
+                    document.getElementById('gst-amount').textContent = gstAmount.toFixed(2);
+                }
+
+                document.getElementById('total-bill').addEventListener('input', updateTotal);
+                document.getElementById('service-charge').addEventListener('change', updateTotal);
+                document.getElementById('gst').addEventListener('change', updateTotal);
+                function calculateFinalPrice(productPrice, includeServiceCharge, includeGst) {
+                    const serviceChargeAmount = includeServiceCharge ? productPrice * 0.10 : 0;
+                    const gstAmount = includeGst ? (productPrice + serviceChargeAmount) * 0.09 : 0;
+                    const finalPrice = productPrice + serviceChargeAmount + gstAmount;
+                    return {
+                        finalPrice: finalPrice.toFixed(2),
+                        breakdown: `Base: ${productPrice.toFixed(2)}, SC: ${serviceChargeAmount.toFixed(2)}, GST: ${gstAmount.toFixed(2)}`
+                    };
+                }
+
+                function updatePersonFinalPrices() {
+                    const includeServiceCharge = document.getElementById('service-charge').checked;
+                    const includeGst = document.getElementById('gst').checked;
+
+                    document.querySelectorAll('#people-table tbody tr').forEach(row => {
+                        const productPrice = parseFloat(row.querySelector('.product-price').value) || 0;
+                        const finalPriceCell = row.querySelector('.final-price');
+                        const { finalPrice, breakdown } = calculateFinalPrice(productPrice, includeServiceCharge, includeGst);
+                        finalPriceCell.textContent = `${finalPrice} (${breakdown})`;
+                    });
+                }
+
+                document.getElementById('add-person').addEventListener('click', () => {
+                    const tableBody = document.querySelector('#people-table tbody');
+                    const newRow = document.createElement('tr');
+
+                    newRow.innerHTML = `
+                        <td><input type="text" class="person-name" placeholder="Enter name"></td>
+                        <td><input type="number" class="product-price" placeholder="Enter price" step="0.01"></td>
+                        <td class="final-price">0.00</td>
+                        <td><button class="remove-person">Remove</button></td>
+                    `;
+
+                    newRow.querySelector('.product-price').addEventListener('input', updatePersonFinalPrices);
+                    newRow.querySelector('.remove-person').addEventListener('click', () => {
+                        newRow.remove();
+                        updatePersonFinalPrices();
+                    });
+
+                    tableBody.appendChild(newRow);
+                });
+
+                document.getElementById('service-charge').addEventListener('change', updatePersonFinalPrices);
+                document.getElementById('gst').addEventListener('change', updatePersonFinalPrices);
+            </script>
+        </main>
+        <footer>
+            <p>&copy; 2025 Li Bowen</p>
+        </footer>
+    </body>
+</html>
